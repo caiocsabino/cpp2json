@@ -3,8 +3,8 @@
 
 // Supports most common-built in types, containers, references, raw pointers and std::shared_ptr.
 
-#define SERIALISE(x) 	template<class R> void serialise(R& r) const { r x; }
-#define DESERIALISE(x) 	template<class R> void deserialise(R& r) { r x; }
+#define SERIALISE(x) 	template<class CPP2JSON_TYPE> void serialise(CPP2JSON_TYPE& cpp2jsonObj) const { cpp2jsonObj x; }
+#define DESERIALISE(x) 	template<class CPP2JSON_TYPE> void deserialise(CPP2JSON_TYPE& cpp2jsonObj) { cpp2jsonObj x; }
 
 // Macros for declaring fields as serialisable.
 // Supports 100 entries, more can be added if needed.
