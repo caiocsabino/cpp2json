@@ -167,6 +167,22 @@ public:
 
 		documentToParse.pop();
 	}
+    
+    template<class T>
+    auto read(T* obj) -> decltype(obj->deserialise(*this), void())
+    {
+        obj->deserialise(*this);
+
+        documentToParse.pop();
+    }
+    
+    template<class T>
+    auto read(std::shared_ptr<T> obj) -> decltype(obj->deserialise(*this), void())
+    {
+        obj->deserialise(*this);
+
+        documentToParse.pop();
+    }
 
 	template<class T>
 	Cpp2JsonReader& operator()(const char* name, T& field)
@@ -223,11 +239,26 @@ private:
 	{
 		value = document[fieldName].GetString();
 	}
+    
+    void read(unsigned int& value, const char*  fieldName, const rapidjson::Value& document)
+    {
+        value = document[fieldName].GetUint();
+    }
+    
+    void read(uint64_t& value, const char*  fieldName, const rapidjson::Value& document)
+    {
+        value = document[fieldName].GetUint64();
+    }
 
 	void read(int& value, const char*  fieldName, const rapidjson::Value& document)
 	{
 		value = document[fieldName].GetInt();
 	}
+    
+    void read(int64_t& value, const char*  fieldName, const rapidjson::Value& document)
+    {
+        value = document[fieldName].GetInt64();
+    }
 
 	void read(float& value, const char* fieldName, const rapidjson::Value& document) 
 	{
@@ -238,16 +269,36 @@ private:
 	{
 		value = document[fieldName].GetDouble();
 	}
+    
+    void read(bool& value, const char* fieldName, const rapidjson::Value& document)
+    {
+        value = document[fieldName].GetBool();
+    }
 
 	void readFromVectorEntry(std::string& value, const rapidjson::Value& document) 
 	{
 		value = document.GetString();
 	}
+    
+    void readFromVectorEntry(unsigned int& value, const rapidjson::Value& document)
+    {
+        value = document.GetUint();
+    }
+    
+    void readFromVectorEntry(uint64_t& value, const rapidjson::Value& document)
+    {
+        value = document.GetUint64();
+    }
 
 	void readFromVectorEntry(int& value, const rapidjson::Value& document)
 	{
 		value = document.GetInt();
 	}
+    
+    void readFromVectorEntry(int64_t& value, const rapidjson::Value& document)
+    {
+        value = document.GetInt64();
+    }
 
 	void readFromVectorEntry(float& value, const rapidjson::Value& document) 
 	{
@@ -258,6 +309,11 @@ private:
 	{
 		value = document.GetDouble();
 	}
+    
+    void readFromVectorEntry(bool& value, const rapidjson::Value& document)
+    {
+        value = document.GetBool();
+    }
 
 	template<class T>
 	auto readFromVectorEntry(T& obj, const rapidjson::Value& document) -> decltype(obj.deserialise(*this), void())
@@ -467,11 +523,26 @@ private:
 		obj->serialise(*this);
 		m_output << "}";
 	}
+    
+    void write(unsigned int value)
+    {
+        m_output << value;
+    }
+    
+    void write(uint64_t value)
+    {
+        m_output << value;
+    }
 
 	void write(int value)
 	{
 		m_output << value;
 	}
+    
+    void write(int64_t value)
+    {
+        m_output << value;
+    }
 
 	void write(float value) 
 	{
@@ -487,6 +558,11 @@ private:
 	{
 		m_output << '"' << value << '"';
 	}
+    
+    void write(bool value)
+    {
+        m_output << (value ? "true" : "false");
+    }
 
 	template<class T>
 	void write(const std::vector<T>& value) 
