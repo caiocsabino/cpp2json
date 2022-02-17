@@ -199,10 +199,6 @@ public:
 
 			read(field, name, *document);
 		}
-		else
-		{
-			assert(false);
-		}
 
 		return *this;
 	}
