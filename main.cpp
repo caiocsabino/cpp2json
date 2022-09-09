@@ -135,7 +135,7 @@ int main()
 
 	for (uint32_t i = 0; i < 500; ++i)
 	{
-		std::shared_ptr<Character> enemy = std::make_shared<Character>(Position(0,3+i), "enemy.png");
+		std::shared_ptr<Character> enemy = std::make_shared<Character>(Position(0.0f,static_cast<float>(3+i)), "enemy.png");
 		gameMap.AddEnemy(enemy);
 	}
 
