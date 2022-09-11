@@ -1,10 +1,21 @@
-#ifndef CPP2JSON_H
-#define CPP2JSON_H
+#pragma once
 
-// Supports most common-built in types, containers, references, raw pointers and std::shared_ptr.
+#define __CPP2JSON_SERIALISE(x) 	template<class CPP2JSON_TYPE> void cpp2json_internal_serialise(CPP2JSON_TYPE& cpp2jsonObj) const { cpp2jsonObj x; }	\
+									std::string Cpp2JsonGetSerialisationString() const																	\
+									{																													\
+											std::stringstream serialisationStream;																		\
+											Cpp2JsonWriter jsonWriter = Cpp2JsonWriter(serialisationStream);											\
+											jsonWriter.write(*this);																						\
+											return serialisationStream.str();																			\
+									}																													\
 
-#define SERIALISE(x) 	template<class CPP2JSON_TYPE> void serialise(CPP2JSON_TYPE& cpp2jsonObj) const { cpp2jsonObj x; }
-#define DESERIALISE(x) 	template<class CPP2JSON_TYPE> void deserialise(CPP2JSON_TYPE& cpp2jsonObj) { cpp2jsonObj x; }
+#define __CPP2JSON_DESERIALISE(x) 	template<class CPP2JSON_TYPE> void cpp2json_internal_deserialise(CPP2JSON_TYPE& cpp2jsonObj) { cpp2jsonObj x; }		\
+									void Cpp2JsonDeserialise(const std::string& serialisationStr)											\
+									{																													\
+										rapidjson::Document jsonDocument = rapidjson::Document();														\
+										Cpp2JsonReader jsonReader = Cpp2JsonReader(serialisationStr, &jsonDocument);									\
+										jsonReader.read(*this);																						\
+									}																													\
 
 // Macros for declaring fields as serialisable.
 // Supports 100 entries, more can be added if needed.
@@ -121,20 +132,20 @@
 #define c_(M, ...) EXPAND(M(__VA_ARGS__))
 //</generated_code>
 
-#define SERIALISATION(...)	SERIALISE 																	\
-							(    																		\
-								c_(XPASTE(c, PP_NARG(__VA_ARGS__)), __VA_ARGS__) 						\
-							)																			\
-							DESERIALISE																	\
-							(    																		\
-								c_(XPASTE(c, PP_NARG(__VA_ARGS__)), __VA_ARGS__) 						\
-							)																			\
-							friend class Cpp2JsonReader;												\
-							friend class Cpp2JsonWriter;												\
+#define CPP2JSON_SERIALISATION(...)	__CPP2JSON_SERIALISE 									\
+									(    													\
+										c_(XPASTE(c, PP_NARG(__VA_ARGS__)), __VA_ARGS__)	\
+									)														\
+									__CPP2JSON_DESERIALISE									\
+									(    													\
+										c_(XPASTE(c, PP_NARG(__VA_ARGS__)), __VA_ARGS__)	\
+									)														\
+									friend class Cpp2JsonReader;							\
+									friend class Cpp2JsonWriter;							\
 
 
-#define JSON_MAP_KEY_TAG "_json_map_key_"
-#define JSON_MAP_VALUE_TAG "_json_map_value_"
+#define __CPP2JSON_JSON_MAP_KEY_TAG "_json_map_key_"
+#define __CPP2JSON_JSON_MAP_VALUE_TAG "_json_map_value_"
 
 #include "rapidjson/document.h"
 
@@ -161,27 +172,27 @@ public:
 	}
 
 	template<class T>
-	auto read(T& obj) -> decltype(obj.deserialise(*this), void())
+	auto read(T& obj) -> decltype(obj.cpp2json_internal_deserialise(*this), void())
 	{
 		obj = T();
 
-		obj.deserialise(*this);
+		obj.cpp2json_internal_deserialise(*this);
 
 		documentToParse.pop();
 	}
     
     template<class T>
-    auto read(T* obj) -> decltype(obj->deserialise(*this), void())
+    auto read(T* obj) -> decltype(obj->cpp2json_internal_deserialise(*this), void())
     {
-        obj->deserialise(*this);
+        obj->cpp2json_internal_deserialise(*this);
 
         documentToParse.pop();
     }
     
     template<class T>
-    auto read(std::shared_ptr<T> obj) -> decltype(obj->deserialise(*this), void())
+    auto read(std::shared_ptr<T> obj) -> decltype(obj->cpp2json_internal_deserialise(*this), void())
     {
-        obj->deserialise(*this);
+        obj->cpp2json_internal_deserialise(*this);
 
         documentToParse.pop();
     }
@@ -208,27 +219,27 @@ public:
 private:
 
 	template<class T>
-	auto read(T& obj, const char*  fieldName, const rapidjson::Value& document) -> decltype(obj.deserialise(*this), void())
+	auto read(T& obj, const char*  fieldName, const rapidjson::Value& document) -> decltype(obj.cpp2json_internal_deserialise(*this), void())
 	{
 		obj = T();
 
-		obj.deserialise(*this);
+		obj.cpp2json_internal_deserialise(*this);
 
 		documentToParse.pop();
 	}
 
 	template<class T>
-	auto read(T* obj, const char*  fieldName, const rapidjson::Value& document) -> decltype(obj->serialise(*this), void())
+	auto read(T* obj, const char*  fieldName, const rapidjson::Value& document) -> decltype(obj->cpp2json_internal_serialise(*this), void())
 	{
-		obj->deserialise(*this);
+		obj->cpp2json_internal_deserialise(*this);
 
 		documentToParse.pop();
 	}
 
 	template<class T>
-	auto read(std::shared_ptr<T> obj, const char*  fieldName, const rapidjson::Value& document) -> decltype(obj->serialise(*this), void())
+	auto read(std::shared_ptr<T> obj, const char*  fieldName, const rapidjson::Value& document) -> decltype(obj->cpp2json_internal_serialise(*this), void())
 	{
-		obj->deserialise(*this);
+		obj->cpp2json_internal_deserialise(*this);
 
 		documentToParse.pop();
 	}
@@ -314,9 +325,9 @@ private:
     }
 
 	template<class T>
-	auto readFromVectorEntry(T& obj, const rapidjson::Value& document) -> decltype(obj.deserialise(*this), void())
+	auto readFromVectorEntry(T& obj, const rapidjson::Value& document) -> decltype(obj.cpp2json_internal_deserialise(*this), void())
 	{
-		obj.deserialise(*this);
+		obj.cpp2json_internal_deserialise(*this);
 	}
 
 	template<class T>
@@ -334,7 +345,7 @@ private:
 	{
 		T* newEntry = new T();
 
-		newEntry->deserialise(*this);
+		newEntry->cpp2json_internal_deserialise(*this);
 
 		vector.push_back(newEntry);
 	}
@@ -344,7 +355,7 @@ private:
 	{
 		std::shared_ptr<T> newEntry = std::make_shared<T>();
 
-		newEntry->deserialise(*this);
+		newEntry->cpp2json_internal_deserialise(*this);
 
 		vector.push_back(newEntry);
 	}
@@ -354,7 +365,7 @@ private:
 	{
 		R newValue = R();
 
-		read(newValue, JSON_MAP_VALUE_TAG, document);
+		read(newValue, __CPP2JSON_JSON_MAP_VALUE_TAG, document);
 
 		map[key] = newValue;
 	}
@@ -364,7 +375,7 @@ private:
 	{
 		R* newValue = new R();
 
-		read(newValue, JSON_MAP_VALUE_TAG, document);
+		read(newValue, __CPP2JSON_JSON_MAP_VALUE_TAG, document);
 
 		map[key] = newValue;
 	}
@@ -374,7 +385,7 @@ private:
 	{
 		std::shared_ptr<R> newValue = std::make_shared<R>();
 
-		read(newValue, JSON_MAP_VALUE_TAG, document);
+		read(newValue, __CPP2JSON_JSON_MAP_VALUE_TAG, document);
 
 		map[key] = newValue;
 	}
@@ -428,7 +439,7 @@ private:
 
 				if (itemElement.IsObject())
 				{
-					if (!(itemElement.HasMember(JSON_MAP_KEY_TAG) && itemElement.HasMember(JSON_MAP_VALUE_TAG)))
+					if (!(itemElement.HasMember(__CPP2JSON_JSON_MAP_KEY_TAG) && itemElement.HasMember(__CPP2JSON_JSON_MAP_VALUE_TAG)))
 					{
 						assert(false);
 					}
@@ -437,11 +448,11 @@ private:
 						T newKey = T();
 						R newValue = R();
 
-						read(newKey, JSON_MAP_KEY_TAG, itemElement);
+						read(newKey, __CPP2JSON_JSON_MAP_KEY_TAG, itemElement);
 
-						if (itemElement[JSON_MAP_VALUE_TAG].IsObject())
+						if (itemElement[__CPP2JSON_JSON_MAP_VALUE_TAG].IsObject())
 						{
-							const rapidjson::Value& objToPush = itemElement[JSON_MAP_VALUE_TAG];
+							const rapidjson::Value& objToPush = itemElement[__CPP2JSON_JSON_MAP_VALUE_TAG];
 							documentToParse.push(&objToPush);
 						}
 
@@ -481,11 +492,11 @@ public:
 	}
 
 	template<class T>
-	auto write(const T& obj) -> decltype(obj.serialise(*this), void())
+	auto write(const T& obj) -> decltype(obj.cpp2json_internal_serialise(*this), void())
 	{
 		m_output << "{";
 		m_needsComma = false;
-		obj.serialise(*this);
+		obj.cpp2json_internal_serialise(*this);
 		m_output << "}";
 	}
 
@@ -505,20 +516,20 @@ public:
 private:
 
 	template<class T>
-	auto write(const T* obj) -> decltype(obj->serialise(*this), void())
+	auto write(const T* obj) -> decltype(obj->cpp2json_internal_serialise(*this), void())
 	{
 		m_output << "{";
 		m_needsComma = false;
-		obj->serialise(*this);
+		obj->cpp2json_internal_serialise(*this);
 		m_output << "}";
 	}
 
 	template<class T>
-	auto write(const std::shared_ptr<T> obj) -> decltype(obj->serialise(*this), void())
+	auto write(const std::shared_ptr<T> obj) -> decltype(obj->cpp2json_internal_serialise(*this), void())
 	{
 		m_output << "{";
 		m_needsComma = false;
-		obj->serialise(*this);
+		obj->cpp2json_internal_serialise(*this);
 		m_output << "}";
 	}
     
@@ -587,10 +598,10 @@ private:
 
 		for( auto it = value.begin(); it != value.end();)
 		{
-			m_output << "{ \"" << JSON_MAP_KEY_TAG << "\": ";
+			m_output << "{ \"" << __CPP2JSON_JSON_MAP_KEY_TAG << "\": ";
 			write(it->first);
 
-			m_output << ", \"" << JSON_MAP_VALUE_TAG << "\": ";
+			m_output << ", \"" << __CPP2JSON_JSON_MAP_VALUE_TAG << "\": ";
 			write(it->second);
 
 			m_output << "}";
@@ -609,5 +620,3 @@ private:
 	std::stringstream& m_output;
 	bool m_needsComma;
 };
-
-#endif

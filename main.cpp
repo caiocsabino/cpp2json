@@ -26,13 +26,13 @@ public:
 	inline float GetX() const { return x;}
 	inline float GetY() const { return y;}
 
-private:
-
-	SERIALISATION
+	CPP2JSON_SERIALISATION
 	(
 		x,
 		y
 	)
+
+private:
 
 	float x;
 	float y;
@@ -61,13 +61,13 @@ public:
 	inline const std::string& GetSprite() const { return sprite; }
 	inline void SetSprite(const std::string& asprite) { sprite = asprite; }
 
-private:
-
-	SERIALISATION
+	CPP2JSON_SERIALISATION
 	(
 		position,
 		sprite
 	)
+
+private:
 
 	Position position;
 	std::string sprite;
@@ -106,14 +106,14 @@ public:
 		return team.at(memberId)->GetPosition();
 	}
 
-private:
-
-	SERIALISATION
+	CPP2JSON_SERIALISATION
 	(
 		id,
 		enemies,
 		team
 	)
+
+private:
 
 	int id;
 
@@ -139,33 +139,27 @@ int main()
 		gameMap.AddEnemy(enemy);
 	}
 
-	std::stringstream serialisationStream;
-	Cpp2JsonWriter jsonWriter = Cpp2JsonWriter(serialisationStream);
-	jsonWriter.write(gameMap);
+	const std::string& serialisationStr = gameMap.Cpp2JsonGetSerialisationString();
 
 	GameMap clone = GameMap();
 
-	rapidjson::Document jsonDocument = rapidjson::Document();
-
-	Cpp2JsonReader jsonReader = Cpp2JsonReader(serialisationStream.str(), &jsonDocument);
-	jsonReader.read(clone);
+	clone.Cpp2JsonDeserialise(serialisationStr);
 
 	// Verification: Do we have a wizard at 0,0?
 	bool foundWizard = clone.GetTeamMemberPosition("wizard").GetX() == 0;
 	std::cout << "\nFound wizard: " << foundWizard;
 
-	// Verify if serialisation strings are identical for both objects.
-	std::stringstream verificationStream;
-	Cpp2JsonWriter jsonWriterVerification = Cpp2JsonWriter(verificationStream);
-	jsonWriterVerification.write(clone);
+	const std::string& cloneSerialisationStr = clone.Cpp2JsonGetSerialisationString();
 
-	if (serialisationStream.str() == verificationStream.str())
+	// Verify if serialisation strings are identical for both objects.
+	
+	if (serialisationStr == cloneSerialisationStr)
 	{
-		std::cout << "\nSuccess! Identical serialisation.\n" << serialisationStream.str();
+		std::cout << "\nSuccess! Identical serialisation.\n" << serialisationStr;
 	}
 	else
 	{
-		std::cout << "\nFailure! Serialisation strings do not match.\n" << serialisationStream.str() << "\n\n" << verificationStream.str();
+		std::cout << "\nFailure! Serialisation strings do not match.\n" << serialisationStr << "\n\n" << cloneSerialisationStr;
 	}
 
 	std::cout << "\n";
