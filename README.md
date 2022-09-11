@@ -9,6 +9,43 @@ JSON parsing implemented with RapidJSON:
 
 Serializable fields can be pointers, objects, built-in types, vectors and maps.
 Pointer types must be allocated before serialisation and deserialisation, preferrably in the constructor.
+## Usage
+Declaring class properties as serialisables:
+```cpp
+class Position
+{
+public:
+	Position()
+		: x(0.0f)
+		, y(0.0f)
+	{
+
+	}
+
+	CPP2JSON_SERIALISATION
+	(
+		x,
+		y
+	)
+
+private:
+
+	float x;
+	float y;
+
+};
+```
+Serialisation:
+```cpp
+Position position = Position();
+const std::string& serialisationStr = position.Cpp2JsonGetSerialisationString();
+```
+Deserialisation:
+```cpp
+Position clone = Position();
+clone.Cpp2JsonDeserialise(serialisationStr);
+// clone now has serialisable properties and is ready to use.
+```
 
 ## Running the example
 - Clone the repository and initialize RapidJson submodule:
