@@ -3,7 +3,7 @@
 
 // Creates different classes to showcase serialisation for all supported types.
 
-class Position
+class Position : public Cpp2JsonSerialisable
 {
 public:
 	Position()
@@ -39,7 +39,7 @@ private:
 
 };
 
-class Character
+class Character : public Cpp2JsonSerialisable
 {
 public:
 	Character() 
@@ -74,7 +74,37 @@ private:
 
 };
 
-class GameMap
+// Example of inheritance
+class Player : public Character
+{
+public:
+	Player() 
+		: Character()
+		, health(1.0f)
+	{
+	
+	}
+
+	Player(const Position& aposition, const std::string& asprite)
+		: Character(aposition, asprite)
+		, health(1.0f)
+	{
+
+	}
+
+	// Ensures the serialisable properties in Character are included.
+	CPP2JSON_DECLARE_BASE_CLASS(Character)
+
+	CPP2JSON_SERIALISATION
+	(
+		health
+	)
+
+private:
+	float health;
+};
+
+class GameMap : Cpp2JsonSerialisable
 {
 public:
 	GameMap()
@@ -82,6 +112,8 @@ public:
 	{
 		enemies = std::vector<std::shared_ptr<Character>>();
 		team = std::map<std::string, std::shared_ptr<Character>>();
+
+		player = std::make_shared<Player>(Position(0, 0), "player.png");
 	}
 
 	GameMap(int aid)
@@ -89,6 +121,8 @@ public:
 	{
 		enemies = std::vector<std::shared_ptr<Character>>();
 		team = std::map<std::string, std::shared_ptr<Character>>();
+
+		player = std::make_shared<Player>(Position(0, 0), "player.png");
 	}
 
 	inline void AddEnemy(std::shared_ptr<Character> enemy)
@@ -110,7 +144,8 @@ public:
 	(
 		id,
 		enemies,
-		team
+		team,
+		player
 	)
 
 private:
@@ -119,6 +154,8 @@ private:
 
 	std::vector<std::shared_ptr<Character>> enemies;
 	std::map<std::string, std::shared_ptr<Character>> team;
+
+	std::shared_ptr<Player> player;
 };
 
 int main() 

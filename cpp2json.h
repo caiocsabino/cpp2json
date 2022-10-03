@@ -1,21 +1,21 @@
 #pragma once
 
-#define __CPP2JSON_SERIALISE(x) 	template<class CPP2JSON_TYPE> void cpp2json_internal_serialise(CPP2JSON_TYPE& cpp2jsonObj) const { cpp2jsonObj x; }	\
-									std::string Cpp2JsonGetSerialisationString() const																	\
-									{																													\
-											std::stringstream serialisationStream;																		\
-											Cpp2JsonWriter jsonWriter = Cpp2JsonWriter(serialisationStream);											\
-											jsonWriter.write(*this);																						\
-											return serialisationStream.str();																			\
-									}																													\
+#define __CPP2JSON_SERIALISE(x) 	template<class CPP2JSON_TYPE> void cpp2json_internal_serialise(CPP2JSON_TYPE& cpp2jsonObj) const { Cpp2JsonSuper::cpp2json_internal_serialise(cpp2jsonObj); cpp2jsonObj x; }	\
+									std::string Cpp2JsonGetSerialisationString() const																																\
+									{																																												\
+											std::stringstream serialisationStream;																																	\
+											Cpp2JsonWriter jsonWriter = Cpp2JsonWriter(serialisationStream);																										\
+											jsonWriter.write(*this);																																				\
+											return serialisationStream.str();																																		\
+									}																																												\
 
-#define __CPP2JSON_DESERIALISE(x) 	template<class CPP2JSON_TYPE> void cpp2json_internal_deserialise(CPP2JSON_TYPE& cpp2jsonObj) { cpp2jsonObj x; }		\
-									void Cpp2JsonDeserialise(const std::string& serialisationStr)											\
-									{																													\
-										rapidjson::Document jsonDocument = rapidjson::Document();														\
-										Cpp2JsonReader jsonReader = Cpp2JsonReader(serialisationStr, &jsonDocument);									\
-										jsonReader.read(*this);																						\
-									}																													\
+#define __CPP2JSON_DESERIALISE(x) 	template<class CPP2JSON_TYPE> void cpp2json_internal_deserialise(CPP2JSON_TYPE& cpp2jsonObj) { Cpp2JsonSuper::cpp2json_internal_deserialise(cpp2jsonObj); cpp2jsonObj x; }		\
+									void Cpp2JsonDeserialise(const std::string& serialisationStr)																													\
+									{																																												\
+										rapidjson::Document jsonDocument = rapidjson::Document();																													\
+										Cpp2JsonReader jsonReader = Cpp2JsonReader(serialisationStr, &jsonDocument);																								\
+										jsonReader.read(*this);																																						\
+									}																																												\
 
 // Macros for declaring fields as serialisable.
 // Supports 100 entries, more can be added if needed.
@@ -143,6 +143,7 @@
 									friend class Cpp2JsonReader;							\
 									friend class Cpp2JsonWriter;							\
 
+#define CPP2JSON_DECLARE_BASE_CLASS(BaseClassName) typedef BaseClassName Cpp2JsonSuper;
 
 #define __CPP2JSON_JSON_MAP_KEY_TAG "_json_map_key_"
 #define __CPP2JSON_JSON_MAP_VALUE_TAG "_json_map_value_"
@@ -155,6 +156,18 @@
 #include <vector>
 #include <map>
 #include <stack>
+
+class Cpp2JsonSerialisable
+{
+protected:
+	template<class CPP2JSON_TYPE> 
+	void cpp2json_internal_serialise(CPP2JSON_TYPE& cpp2jsonObj) const {}
+
+	template<class CPP2JSON_TYPE> 
+	void cpp2json_internal_deserialise(CPP2JSON_TYPE& cpp2jsonObj) {}
+
+	typedef Cpp2JsonSerialisable Cpp2JsonSuper;
+};
 
 class Cpp2JsonReader
 {
